@@ -1,0 +1,246 @@
+\section{Backgrounds \& preliminaries knowledge}
+
+Trong phần này, chúng tôi hệ thống lại các khái niệm nền tảng và cơ sở, bao gồm đồ thị tri thức, nhúng đồ thị tri thức, suy diễn đồ thị tri thức đa bước, nền tảng cho các phương pháp tối ưu hóa, và phép biến đổi Fourier.
+
+\subsection{Knowledge graphs}
+
+Đồ thị tri thức là một loại dữ liệu đa quan hệ được tổ chức dưới dạng đồ thị, mà trong đó các nút thể hiện những thực thể và các cạnh nối giữa các nút này thể hiện mối quan hệ giữa chúng. Trong bản technical report này, chúng tôi hình thức hóa dạng toán cho đồ thị tri thức dưới dạng toán học như sau $\mathcal{G} = \{\mathcal{E}, \mathcal{R}, \mathcal{F}\}$, trong đó $\mathcal{E}$, $\mathcal{R}$, và $\mathcal{F}$ lần lượt là tập hợp các thực thể, quan hệ, và bộ ba dữ kiện dưới dạng $(h, r, t)$. Ví dụ: (Hà Nội, là thủ đô, Việt Nam)
+
+
+\subsection{Knowledge graph embedding}
+
+Một mô hình nhúng đồ thị tri thức thông thường bao gồm bốn thành phần chính yếu: các vector nhúng (embedding vectors), hàm tính điểm (score functions), chiến lược (phát sinh) lấy mẫu âm (negative sampling strategy), và hàm mất mát (lossfunction).
+
+\subsubsection{Embedding vectors}
+
+Mục tiêu của nhúng đồ thị tri thức là thể hiện dữ liệu đồ thị tri thức ở không gian (vectors) liên tục thấp chiều (low-dimensional continuous space) mà vẫn bảo toàn cấu trúc đồ thị nhiều nhất có thể.
+
+Biểu diễn nhúng đồ thị ngây thơ (naive approach) là biểu diễn ma trận kề mà sử dụng một ma trận vuông có kích thước bình phương số lượng thực thể. Điều này gây ra tiêu tốn quá nhiều bộ nhớ, chưa kể dữ liệu đa quan hệ phức tạp hơn rất nhiều so với đồ thị tổng quát.
+
+Phương pháp nhúng đồ thị tri thức sử dụng các vector nhúng số thực cho các thành phần của đồ thị tri thức, $(\mathbf{h}, \mathbf{r}, \mathbf{t}) \in \mathbb{R}^d$, trong đó $d$ là số chiều nhúng cho mỗi vectors.
+
+\subsubsection{Score function}
+
+Hàm tính điểm trong mô hình nhúng đồ thị đóng vai trò đo tính hợp lý của một bộ ba dữ kiện, ký hiệu là $f_r(\mathbf{h}, \mathbf{r}, \mathbf{t})$. Dựa trên các công trình hiện nay, có hai loại hàm tính điểm chính: dựa trên khoảng cách (tức là các khoảng cách thông dụng như Euclidean distance, hay Manhattan distance)l và dựa trên mức độ tương đồng (cosine similarity, hay Jaccard similarity).
+\begin{itemize}
+    \item Một hàm tính điểm dựa trên khoảng cách tính toán mức độ hợp lý của một bô ba bằng cách sử dụng metric khoảng cách để tính toán khoảng cách giữa thực thể nguồn và thực thể mục tiêu.
+    \item Một hàm tính điểm dựa trên mức độ tương đồng tính toán mức độ hợp lý của một bộ ba dữ kiện bằng cách sử dụng các phương pháp khớp ngữ nghĩa (dựa trên phép tích vô hướng)
+\end{itemize}
+
+Nếu một bộ ba dữ kiện có tính hợp lý cao, điểm số của nó càng cao.
+
+\subsubsection{Negative sampling strategy}
+
+Đồ thị tri thức luôn phải chứa những tri thức đúng đắn về thế giới này. Thế nào là tri thức đúng đắn? Thế nào là tri thức? Tri thức là những gì chúng ta tin là đúng. Do vậy, những dữ liệu để xây dựng đồ thị tri thức cần phải xác minh một cách rõ ràng. Nhưng vấn đề nảy sinh ở đây là khi áp dụng các phương pháp học máy để giải quyết các bài toán khai thác dữ liệu, chúng ta không có mẫu âm. Các chiến lược phát sinh mẫu âm được đề xuất để phát sinh mẫu âm một cách hợp lý cho các mô hình học. Một số cách tiếp cận truyền thống sử dụng các phân phối như Uniform hay Bernoulli negative sampling hoặc Adversarial negative sampling.
+
+\subsubsection{Loss function}
+
+Quá trình học là một quá trình tối ưu một hàm mục tiêu. Mô hình nhúng đồ thị tri thức cố gắng hiệu chỉnh các bản nhúng sao cho những mẫu dương luôn có điểm số cao hơn các mẫu âm. Và dó, hiển nhiên các phương pháp dựa trên local descent được sử dụng như Adam, AdaGrad. Ở phần phương pháp đề xuất, chúng tôi sử dụng pháp Quasi-hyperbolic momentum kết hợp với Adam để tối ưu hóa hàm mục tiêu.
+
+\subsection{Multi-hop knowledge graph reasoning}
+
+Bài toán suy diễn đồ thị tri thức đa bước (Multi-hop knowledge graph reasoning) được phát biểu như sau: Cho trước một mệnh đề truy vấn (query statement), mệnh đề này có thể một trong ba kiểu khác nhau: $(h, r, ?)$, $(?, r, t)$, hay $(h, ?, t)$. Mục tiêu của bài toán là tìm kiếm những thực thể tiềm năng có thể thay thế những vị trí bị thiếu mất trong bộ ba dữ kiện cho trước trong một đường dẫn suy diễn $k$ bước ($k$-hop reasoning path) $e_1 \overset{r_1}{\rightarrow} e_2 \overset{r_2}{\rightarrow} e_3 \cdots \overset{r_k}{\rightarrow} e_{k+1}$
+
+
+\subsection{Background for optimizations}
+
+Các phương pháp tối ưu (optimization methods) đối mặt với vấn đề tìm điểm (desgin point) mà cực tiểu (hoặc cực đại - tùy vào bài toán đang xem xét) một hàm mục tiêu (objective function). Việc biết được giá trị của một hàm số thay đổi như thế với các đầu vào của nó được xem là một điều cần thiết và hữu ích. Bởi vì điều này cho chúng ta biết hướng nào để mà di chuyển đến gần với điểm tối ưu hơn so với vị trí trước đó. Sự thay đổi trong giá trị của hàm số được đo bằng cách tính toán đạo hàm trong một trường hợp hàm một biến và tính toán gradient trong trường hợp hàm nhiều biến.
+
+\subsubsection{Derivatives}
+
+Đạo hàm (derivative) $f'(x)$ của một hàm $f$ một biến $x$ được hiểu là tỉ lệ mà giá trị của hàm số thay đổi tại $x$. Đạo hàm có thể được sử dụng để cho ta một xấp xỉ tuyến tính (linear approximation) của một hàm số gần $x$, cụ thể:
+\begin{equation}
+    f(x + \Delta x) \approx f(x) + f'(x)\Delta x
+\end{equation}
+
+Một cách toán học, đạo hàm là tỉ lệ giữa sự thay đổi trong $f$ và sự thay đổi trong $x$ tại điểm $x$:
+
+\begin{equation}
+    f'(x) = \frac{\Delta f(x)}{\Delta x} \equiv \frac{d f(x)}{d x}
+\end{equation}
+mà đó là sự thay đổi trong $f(x)$ được chia bởi sự thay đổi trong $x$ khi bước nhảy trở nên vô cùng nhỏ. \emph{Lưu ý}: ký hiệu $f'(x)$ dựa theo Lagrange, $d f(x) / dx$ dựa theo Leibniz.
+
+Định nghĩa dựa trên giới hạn của đạo hàm có thể được biểu diễn theo ba cách khác nhau, bao gồm: hiệu tiến (forward difference), hiệu trung tâm (central difference) và hiệu ngược (backward difference)
+\begin{equation}
+	f'(x) = \displaystyle \lim_{h \to 0}\frac{f(x+h)-f(x)}{h} = \displaystyle \lim_{h \to 0}\frac{f(x+h/2)-f(x-h/2)}{h}=\displaystyle \lim_{h \to 0}\frac{f(x)-f(x-h)}{h}
+\end{equation}
+
+\subsubsection{Gradients}
+
+Xem xét không gian Euclidean có $d$ chiều, ký hiệu là $\mathbb{R}^d$. Các vector trong không gian ký hiệu là $\mathbf{x}$ với giá trị trong chiều thứ $i$ là $x_i$. Tích vô hướng giữa hai vector $\mathbf{x}$ và $\mathbf{y}$ được ký hiệu $\left<\mathbf{x}, \mathbf{y}\right>$.
+
+Gọi hàm $f: \mathbb{R}^d \rightarrow \mathbb{R}$ là một hàm số nhiều biến liên tục. Nếu $f$ là một hàm khả vi (nhiều biến liên tục khả vi - differentiable), gradient của $f$ tại điểm $\mathbf{x}$, ký hiệu là $\nabla f(x)$, là một vector có $d$ chiều, trong đó chiều thứ $i$ là đạo hàm riêng (partial derivative) $\frac{\partial f}{\partial x_i}$ tại $\mathbf{x}$.
+\begin{equation}
+    \nabla f(x) =
+    \begin{bmatrix}
+	    \frac{\partial f(x)}{\partial x_1}, \frac{\partial f(x)}{\partial x_2}, ..., \frac{\partial f(x)}{\partial x_n}
+	\end{bmatrix}
+\end{equation}
+
+Nếu hàm số $f$ có đạo hàm cấp hai, ma trận Hessian của $f$ tại $\mathbf{x}$, ký hiệu là $\nabla^2 f(x)$ là một ma trận vuông có kích thước $d \times d$; hàng thứ $i$ và cột thứ $j$ có giá trị:
+\begin{equation}
+    \nabla^2 f(x)[i, j] = \frac{\partial^2f}{\partial x_i \partial x_j}
+\end{equation}
+Ma trận Hessian có dạng như sau:
+\begin{equation}
+	\nabla^2 f(x) =
+	    \begin{bmatrix}
+		    \frac{\partial^2 f(x)}{\partial x_1 \partial x_1}, \frac{\partial^2 f(x)}{\partial x_1 \partial x_2}, ..., \frac{\partial^2 f(x)}{\partial x_1 \partial x_n}\\
+					...\\
+		    \frac{\partial^2 f(x)}{\partial x_n \partial x_1}, \frac{\partial^2 f(x)}{\partial x_n \partial x_2}, ..., \frac{\partial^2 f(x)}{\partial x_n \partial x_n}
+		\end{bmatrix}
+\end{equation}
+Đạo hàm có hướng $\nabla_{\textbf{s}} f(\textbf{x})$ là tỷ lệ thay đổi tức thời của $f(\mathbf{x})$ khi $\mathbf{x}$ di chuyển với vận tốc $\mathbf{s}$, được định nghĩa theo giới hạn như sau:
+\begin{equation}
+	\nabla_{\textbf{s}} f(x) = \displaystyle \lim_{h \to 0}\frac{f(\textbf{x}+h\textbf{s})-f(\textbf{x})}{h} = \displaystyle \lim_{h \to 0}\frac{f(\textbf{x}+h\textbf{s}/2)-f(\textbf{x}-h\textbf{s}/2)}{h}=\displaystyle \lim_{h \to 0}\frac{f(\textbf{x})-f(\textbf{x}-h\textbf{s})}{h}
+\end{equation}
+Sử dụng gradient cho ta biểu thức gọn hơn
+\begin{equation}
+	\nabla_{\textbf{s}} f(x) = \nabla f(x)^{\top}\textbf{s}
+\end{equation}
+
+\subsubsection{Convex optimization problem}
+
+Một tập $\mathcal{X} \subseteq \mathbb{R}^d$ là tập lồi nếu
+\begin{equation}
+    t\mathbf{x} + (1-t)\mathbf{y} \in \mathcal{X}
+\end{equation}
+với mọi $\mathbf{x}, \mathbf{y} \in \text{dom}f$ và $t \in [0, 1]$. Điểm $t\mathbf{x} + (1-t)\mathbf{y}$ được gọi là một tổ hợp lồi (convex combination) của hai điểm $\mathbf{x}$ và $\mathbf{y}$.
+
+Một hàm $f$ là hàm lồi nếu
+\begin{equation}
+    f(t\mathbf{x} + (1-t)\mathbf{y}) \leq tf(\mathbf{x}) + (1-t)f(\mathbf{y})
+\end{equation}
+với mọi $\mathbf{x}, \mathbf{y} \in \text{dom}f$ và $t \in [0, 1]$.
+
+Điều kiện trên được gọi là điều kiện lồi bậc không (zeoth-order condition) bởi vì điều kiện này không liên quan tới tính toán đạo hàm hay gradient. Ngoài điều kiện bậc không, ta còn có điều kiện lồi bậc một (first-order condition): Hàm khả vi $f$ là một hàm lồi nếu:
+\begin{equation}
+    f(\mathbf{y}) \geq f(\mathbf{x}) + \left<\nabla f(\mathbf{x}), \mathbf{y}-\mathbf{x}\right>, \forall \mathbf{x}, \mathbf{y} \in \mathcal{X}
+\end{equation}
+
+Đối với các hàm khả vi, điều kiện lồi bậc không và bậc một là tương đương. Từ đó, ta có thể phát biểu bổ đề như sau
+\begin{lemma}
+    Nếu $f$ là hàm khả vi trên tập xác định của nó thì điều kiện lồi bậc không và điều kiện lồi bậc hai là tương đương.
+\end{lemma}
+
+Bên cạnh đó, khi xem xét các hàm có đạo hàm cấp hai thì ta còn có điều kiện lồi bậc hai: Hàm $f$ có đạo hàm cấp hai là một hàm lòi nếu $\nabla^2 f(\mathbf{x})$ là ma trận nửa xác định dương (positive semi-definite)
+
+Nếu bất đẳng thức nghiêm ngặt (tức là $<$ thay thì $\leq$) cho tất cả $t \in [0, 1]$ và $\mathbf{x} \ne \mathbf{y}$, thì ta nói $f$ là hàm lồi nghiêm ngặt (strictly convex)
+
+Một hàm $f$ là một hàm lồi mạnh (strongly convex) với tham số $m$ nếu hàm
+\begin{equation}
+    \mathbf{x} \mapsto f(\mathbf{x}) - \frac{m}{2}\|\mathbf{x}\|_2^2
+\end{equation}
+
+Nếu bất đẳng thức là nghiêm ngặt, tức là $<$ thay vì $\leq$ với mọi $t \in (0, 1)$ và $\mathbf{x} \ne \mathbf{y}$, thì ta nói rằng $f$ là lồi nghiêm ngặt (strictly convex).
+
+Một hàm $f$ là lồi mạnh với tham số $m$ ($m$-strongly convex) nếu hàm
+\begin{equation}
+    \mathbf{x} \mapsto f(\mathbf{x}) - \frac{m}{2}\left\|\mathbf{x} \right\|_2^2
+\end{equation}
+là hàm lồi.
+
+Những điều kiện này cho thấy: tính lồi mạnh ám chỉ lồi nghiêm ngặt. Một cách hình học, tính lồi có nghĩa là đường thẳng phân chia giữa hai điểm trên một đồ thị của hàm $f$ nằm trên hoặc trên đồ thị đó. Lồi nghiêm ngặt có nghĩa là đường thẳng phân đoạn nằm trên đồ thị một cách nghiêm ngặt, ngoại trừ những điểm chặn (endpoints).
+
+Điều gì khiến ta lại quan tâm đến một hàm có phải lồi (nghiêm ngặt/ mạnh) hay không? Một cách đơn giản, trên nhiều định nghĩa của chúng ta về tính lồi ám chỉ bản chất của cực tiểu. Nó không có gì ngạc nhiên mà những điều kiện mạnh hơn nói cho chúng ta nhiều hơn về cực tiểu. Tính lồi cho chúng ta những hệ quả được phát biểu dưới dạng mệnh đề như sau (ở đây không chứng minh các mệnh đề này)
+
+\begin{prop}
+    Cho $\mathcal{X}$ là một tập lồi. Nếu $f$ là một hàm lồi, thì bất kỳ cực tiểu địa phương (local minimum) nào của $f$ trong $\mathcal{X}$ cũng là một cực tiểu toàn cục (global minimum)
+\end{prop}
+
+\begin{prop}
+    Cho $\mathcal{X}$ là một tập lồi. Nếu $f$ là một hàm lồi nghiêm ngặt (strictly convex), thì tồn tại ít nhất một cực tiểu địa phương của $f$ trong $\mathcal{X}$. Hệ quả là, nếu nó tồn tại, nó là một cực tiểu toàn cục duy nhất của $f$ trong $\mathcal{X}$
+\end{prop}
+
+Bài toán tối ưu lồi được phát biểu như sau: Cho một hàm lồi $f: \mathbb{R}^d \rightarrow \mathbb{R}$ với tập xác định lồi $K$, bài toán này tìm một điểm $\hat{\mathbf{x}}$ sao cho:
+\begin{equation}
+    f(\hat{\mathbf{x}}) - \text{min}_{\mathbf{x} \in K} \leq \epsilon
+\end{equation}
+với $\epsilon$ là một số thực cho trước, nhỏ hơn 1.
+
+Bài toán tối ưu lồi có hai biến thể: bài toán tối ưu lồi không ràng buộc (unconstrained convex optimization problem) và bài toán tối ưu lồi có ràng buộc (constrained convex optimization problem)
+\begin{itemize}
+    \item Bài toán tối ưu lồi không ràng buộc: Nếu tập xác định lồi $K$ là toàn bộ không gian $\mathbb{R}^d$
+    \item Bài toán tối ưu lồi có ràng buộc: Nếu tập xác định lồi $K$ không là toàn bộ không gian $\mathbb{R}^d$
+\end{itemize}
+
+Để tìm được một tối ưu, ta cần phải biết được tính chất của nó. Trong trường hợp bài toán tối ưu lồi không ràng buộc, tức là $K = \mathbb{R}^d$, điểm $\mathbf{x}^{*}$ tối ưu sẽ thỏa mãn tính chất gradient của $f$ tại $\mathbf{x}^{*}$ là 0 (0 này vector 0)
+\begin{equation}
+    \nabla f(\mathbf{x}^{*}) = \mathbf{0}
+\end{equation}
+
+Trong trường hợp bài toán tối ưu lồi có ràng buộc, tức là $K \ne \mathbb{R}^d$, gradient của $f$ tại $\mathbf{x}^{*}$ có thể không bằng 0. Thì $\mathbf{x}^{*}$ sẽ thỏa mãn tính chất
+\begin{equation}
+    \left<\nabla f(\mathbf{x}^{*}), \mathbf{x}-\mathbf{x}^{*}\right> \geq 0, \forall \mathbf{x} \in K
+\end{equation}
+
+\subsubsection{Generalized algorithm: Iterative Local Descent Method}
+
+Phương pháp phổ thông để tiếp cận bài toán tối ưu là cập nhật một điểm thiết kế (design point) $\mathbf{x}$ từng bước mà cực tiểu giá trị hàm mục tiêu dựa trên một mô hình cục bộ (local model). Các mô hình cục bộ có thể được phát triển dựa trên nhiều hướng tiếp cận như tiếp cận bậc nhất (first-order approach); tiếp cận bậc hai (second-order) xấp xỉ Taylor.
+
+Các thuật toán tối ưu được thiết kế theo cách tiếp cận tổng quát, được gọi là descent direction methods. Chúng bắt đầu với một điểm thiết kế ban đầu (điểm khởi tạo ban đầu) $\mathbf{x}^{(1)}$ và sau đó sinh ra một chuỗi các điểm, ta gọi là lần lặp (iterates), để mà hội tụ về một cục bộ địa phương (local minimum).
+
+\begin{algorithm}[htp]
+\begin{algorithmic}[1]
+    \State Kiểm tra liệu $\mathbf{x}^{(k)}$ có thỏa mãn điều kiện dừng hay không. Nếu thỏa mãn thì dừng thuật toán; không thỏa thì tiếp tục chuyển đến bước tiếp theo\;
+    \State Xác định hướng đi xuống (descent direction) $\mathbf{d}^{(k)}$ bằng cách sử dụng thông tin cục bộ như Gradient cho những phương pháp first-order (hay Hessian cho những phương pháp second-order)\;
+    \State Xác định kích thước của bước nhảy hay tốc độ học (learning rate) $\alpha^{(k)}$\;
+    \State Tính toán điểm thiết kế kế tiếp dựa trên cập nhật\;
+\end{algorithmic}
+\caption{{Thủ tục iterative descent direction}}
+\label{algo:learning_algorithms}
+\end{algorithm}
+
+Với các phương pháp khác nhau, chúng sẽ có cách riêng trong việc quyết định tốc độ học (tỉ lệ học) $\alpha$ và $\mathbf{d}$
+
+\subsection{Fourier transformation}
+
+Biến đổi Fourier là một phiên bản tổng quát hóa của chuỗi (phức) Fourier (complex Fourier series) trong giới hạn $L \rightarrow \infty$. Xem xét một hàm thực $f(x)$, ta có:
+
+\begin{equation}
+    f(x) = \sum_{n=-\infty}^{\infty}A_ne^{inx}
+\end{equation}
+
+
+Biến đổi
+
+\begin{equation}
+    \begin{aligned}
+        \int_{-\pi}^{\pi}f(x)e^{-imx}dx &= \int_{-\pi}^{\pi}\left(\sum_{n=-\infty}^{\infty}A_ne^{inx}\right)e^{-imx}dx\\
+        &= \sum_{n=-\infty}^{\infty}A_n\int_{-\pi}^{\pi}e^{i(m-n)x}dx\\
+        &= \sum_{n=-\infty}^{\infty}A_n\int_{-\pi}^{\pi}\left(
+            cos((n-m)x) + isin((n-x)x)
+        \right)dx\\
+        &= \sum_{n=-\infty}^{\infty}A_n2\pi\delta_{mn}\\
+        &= 2\pi A_{m}
+    \end{aligned}
+\end{equation}
+
+Do đó:
+
+\begin{equation}
+    A_n = \frac{1}{2\pi}\int{-\pi}^{\pi}f(x)e^{-inx}dx
+\end{equation}
+
+Với một hàm tuần hoàn (function periodic) trong $[-L/2, L/2]$, ta có:
+
+\begin{equation}
+    f(x) = \sum_{n=-\infty}^{\infty}A_ne^{i(2\pi nx/L)}
+\end{equation}
+
+\begin{equation}
+    A_n = \frac{1}{L}\int_{-L/2}^{L/2}f(x)e^{-i(2\pi nx/L)}dx
+\end{equation}
+
+Thay thế hàm rời rạc $A_n$ bằng hàm liên tục $F(k)dk$ khi $n/L \rightarrow k$. Thay đổi tổng thành tích phân, và biểu thức trở thành
+
+\begin{equation}\label{eq:inverse_fourier}
+    f(x) = \int_{-\infty}^{\infty}F(k)e^{2\pi ikx}dk = \mathcal{F}_x[f(x)](k)
+\end{equation}
+
+\begin{equation}\label{eq:forward_fourier}
+    F(x) = \int_{-\infty}^{\infty}f(k)e^{-2\pi ikx}dk = \mathcal{F}_k^{-1}[F(k)](x)
+\end{equation}
+
+Biểu thức (\ref{eq:forward_fourier}) được gọi phép biến đổi Fourier thuận, và biểu thức (\ref{eq:inverse_fourier}) được gọi là phép biến đổi Fourier nghịch.
+

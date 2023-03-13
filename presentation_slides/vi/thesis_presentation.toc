@@ -1,0 +1,5 @@
+\babel@toc {english}{}\relax 
+\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
+\beamer@sectionintoc {2}{Background \& Related works}{5}{0}{2}
+\beamer@sectionintoc {3}{Proposed method}{7}{0}{3}
+\beamer@sectionintoc {4}{Experiments \& Conclusions}{8}{0}{4}
