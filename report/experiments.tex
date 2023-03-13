@@ -1,0 +1,246 @@
+\section{Experiments}
+
+\subsection{Datasets, metrics, and settings}
+
+\subsubsection{Datasets}
+
+Trong bài báo kỹ thuật này, chúng tôi sử dụng bốn tập dữ liệu thí nghiệm được lấy mẫu từ cơ sở dữ liệu Freebase\cite{bollacker2008freebase}, NELL\cite{carlson2010toward}, và Wikidata\cite{vrandevcic2014wikidata} cho phần thực nghiệm và đánh giá. Một cách cụ thể hơn, để thấy được mức độ hiệu quả của mô hình trên những bậc thưa (degree of sparsity) khác nhau, chúng tôi sử dụng hai bộ dữ liệu được xây dựng từ tập FB15k-237\cite{toutanova2015representing}, bao gồm: FB15k-237-10\% và FB15k-237-20\%. Những tập dữ liệu này được tạo ra bằng cách lấy ngẫu nhiên lần lượt 10\%, và 20\% số lượng bộ ba từ tập dữ liệu ban đầu.
+
+Bên cạnh đó, chúng tôi sử dụng thêm hai bộ dữ liệu bao gồm NELL23k và WD-singer được lấy mẫu từ hai cơ sở dữ liệu từ NELL và Wikidata. Với NELL23k, nó được tạo ra bằng cách lấy mẫu ngẫu nhiên một số lượng thực thể từ cơ sở dữ liệu, sau đó dựa trên các thực thể thu được tiếp tục truy vấn ra các bộ ba có chứa chúng để hình thành tập dữ liệu. Với WD-singer, nó được tạo ra từ những đối tượng có liên hệ với ca sĩ từ cơ sở dữ liệu Wikidata. Phương pháp hình thành tập dữ liệu cũng tương tự như NELL23k. Thông tin mô tả thống kê cho các bộ dữ liệu đánh giá được trình bày trong Bảng \ref{tab:dataset}
+
+\begin{center}
+    \begin{table}[H]
+        \label{tab:dataset}
+        \centering
+        \caption{Thống kê mô tả của bốn tập dữ liệu thực nghiệm.}
+        \begin{tabular}{llllll}
+        \toprule
+        \multirow{2}{*}{Dataset} & \multirow{2}{*}{\#Entities} & \multirow{2}{*}{\#Relation} & \multirow{2}{*}{\#Fact} & \multicolumn{2}{l}{\#degree}    \\ \cline{5-6}
+        &&&& \multicolumn{1}{l}{mean} & median \\ \midrule
+        FB15K-237-10\%&11,512&237&60,985&\multicolumn{1}{l}{5.8}&4\\
+        FB15K-237-20\%&13,166&237&91,162&\multicolumn{1}{l}{7.5}&5\\
+        NELL23K&22,925&200&35,358&\multicolumn{1}{l}{2.21}&1\\
+        WD-singer&10,282&135&20,508&\multicolumn{1}{l}{2.35}&2\\
+        \bottomrule
+        \end{tabular}
+    \end{table}
+\end{center}
+
+\subsubsection{Metrics}
+
+Với mỗi bộ ba dữ kiện $(h, r, t)$ trong tập dữ liệu, đầu tiên nó sẽ được chuyển đổi thành một bộ ba truy vấn $(h, r, ?)$, và sử dụng mô hình để có được danh sách thứ hạng của những thực thể bị thiếu tương ứng. Để đánh giá khả năng của phương pháp đề xuất, hai độ đo đánh giá được sử dụng: độ đo xếp hạng tương hỗ trung bình (mean reciprocal rank - MRR), và độ đo Hits@K.
+
+\textbf{Độ đo xếp hạng tương hỗ trung bình (MRR)} cho điểm bộ ba dự đoán dựa trên việc chúng có đúng hay không. Nếu bộ ba dự đoán đầu tiên đúng thì điểm của nó là 1 và điểm đúng thứ hai là \(\frac{1}{2}\) và cứ tiếp tục tính cho đến bộ ba thứ n, giá trị MRR cuối cùng được tính bằng cách lấy tổng của tất cả các điểm. Độ đo được tính theo công thức:
+
+\begin{equation}
+\textit{MRR} = \frac{1}{|Q|} \sum_{q\in Q} \frac{1}{q}
+\end{equation}
+
+Độ đo MRR lấy giá trị nghịch đảo nên khắc phục được độ nhạy cảm với nhiễu của độ đo xếp hạng trung bình (MR)~\cite{talukdar2021okgit}. Giá trị độ đo MRR càng lớn thì kết quả mô hình càng tốt.
+
+Ví dụ: Xem xét các bộ ba kiểm tra bao gồm
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ccc}
+\hline
+Head entity &  Relation & Tail entity \\
+\hline
+Jack  & born\_in  & Italy \\
+Jack  & friend\_with  & Thomas \\
+\hline
+\end{tabular}
+\end{table}
+
+Giả sử những bộ đúng trong các bộ ba kiểm tra (được đánh dấu *) được xếp hạng với những bộ ba bị phá hổng (mẫu âm)
+
+\begin{table}[H]
+\centering
+\begin{tabular}{cccccc}
+\hline
+Head entity &  Relation & Tail entity & Score & Rank & \\
+\hline
+Jack &  born\_in &  Ireland    &    0.789   &   1&\\
+Jack &  born\_in &  Italy      &    0.753    &  2&  *\\
+Jack &  born\_in &  Germany    &    0.695    &  3&\\
+Jack &  born\_in &  China      &    0.456    &  4&\\
+Jack &  born\_in &  Thomas     &    0.234    &  5&\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{cccccc}
+\hline
+Head entity &  Relation & Tail entity & Score & Rank & \\
+\hline
+Jack &  friend\_with &  Thomas  &   0.901  &    1& *\\
+Jack &  friend\_with &  China    &  0.345  &    2&\\
+Jack &  friend\_with &  Italy    &  0.293  &    3&\\
+Jack &  friend\_with &  Ireland  &  0.201  &    4&\\
+Jack &  friend\_with &  Germany  &  0.156  &    5&\\
+\hline
+\end{tabular}
+\end{table}
+
+Điểm số dự đoán của từ bộ ba được tính toán tử mô hình dự đoán liên kết được huấn luyện trước được gán và sắp xếp theo thứ tự giảm dần. Điểm số của bộ ba (Jack, born\_in, Italy) được xếp hạng 2 và bộ ba (Jack, friend\_with, Thomas) được xếp hạng 1.
+
+$$
+MRR = \frac{1}{2}\left(1+\frac{1}{2}\right) = \frac{3}{4} = 0.75
+$$
+
+\textbf{Độ đo Hits@K} là xác suất dự đoán đúng mà xếp hạng nhỏ hơn hoặc bằng ngưỡng K. Các giá trị của K thường được sử dụng cho bài toán dự đoán liên kết là 1, 3, 5, 7, 10, còn trong thực nghiệm của mô hình đề xuất ACRM sử dụng K = 1, 3, 10. Giá trị độ đo này càng cao thì kết quả của mô hình càng tốt. Công thức của độ đo:
+
+\begin{equation}
+    \textit{Hits@K} = \frac{|{q\in Q : q < K}|}{|Q|}
+    \end{equation}
+
+    Hits@K đại diện cho khả năng của thuật toán dự đoán chính xác mối quan hệ giữa các bộ ba, nghĩa là đánh giá khả năng của thuật toán hoàn thành biểu đồ tri thức để dự đoán bộ ba chính xác. Đây là một trong những độ đo không thể thiếu đối với bài toán dự đoán liên kết.
+
+    Ví dụ: Xem xét các bộ ba kiểm tra bao gồm
+
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{ccc}
+    \hline
+    Head entity &  Relation & Tail entity \\
+    \hline
+    Jack  & born\_in  & Italy \\
+    Jack  & friend\_with  & Thomas \\
+    \hline
+    \end{tabular}
+    \end{table}
+
+    Giả sử những bộ đúng trong các bộ ba kiểm tra (được đánh dấu *) được xếp hạng với những bộ ba bị phá hổng (mẫu âm)
+
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{cccccc}
+    \hline
+    Head entity &  Relation & Tail entity & Score & Rank & \\
+    \hline
+    Jack &  born\_in &  Ireland    &    0.789   &   1&\\
+    Jack &  born\_in &  Italy      &    0.753    &  2&  *\\
+    Jack &  born\_in &  Germany    &    0.695    &  3&\\
+    Jack &  born\_in &  China      &    0.456    &  4&\\
+    Jack &  born\_in &  Thomas     &    0.234    &  5&\\
+    \hline
+    \end{tabular}
+    \end{table}
+
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{cccccc}
+    \hline
+    Head entity &  Relation & Tail entity & Score & Rank & \\
+    \hline
+    Jack &  friend\_with &  Thomas  &   0.901  &    1& *\\
+    Jack &  friend\_with &  China    &  0.345  &    2&\\
+    Jack &  friend\_with &  Italy    &  0.293  &    3&\\
+    Jack &  friend\_with &  Ireland  &  0.201  &    4&\\
+    Jack &  friend\_with &  Germany  &  0.156  &    5&\\
+    \hline
+    \end{tabular}
+    \end{table}
+
+    Điểm số dự đoán của từ bộ ba được tính toán tử mô hình dự đoán liên kết được huấn luyện trước được gán và sắp xếp theo thứ tự giảm dần. Điểm số của bộ ba (Jack, born\_in, Italy) được xếp hạng 2 và bộ ba (Jack, friend\_with, Thomas) được xếp hạng 1. Điểm số Hits@1 và Hits@3 được tính theo công thức:
+
+    $$
+    Hits@1 = \frac{1}{2} = 0.5
+    $$
+
+    $$
+    Hits@3 = \frac{1}{1} = 1
+    $$
+
+\subsubsection{Settings}
+
+Mô hình đề xuất  được thực nghiệm trên hệ điều hành Ubuntu 18.04.5 LTS, Intel i7-10700K (16) @ 5.100GHz và GPU NVIDIA GeForce RTX 3070 8 GB. Ngôn ngữ Python 3.7 được sử dụng làm ngôn ngữ lập trình để thực nghiệm vì nó hỗ trợ nhiều thư viện thuận tiện cho việc xây dựng các mô hình học máy cũng như dễ dàng trong việc phân tích đánh giá mô hình. Cụ thể, thuật toán sử dụng PyTorch làm thư viện chính để xây dựng mô hình.
+
+Chúng tôi sử dụng phương pháp tìm kiếm lưới (grid search) để tìm siêu tham số tối ưu cho phương pháp đề xuất. Với module KG, chúng tôi cài đặt số chiều nhúng là 200, và sử dụng Complex-Quasi và Fourier-Quasi như một mô hình được huấn luyện trước cho các module sau. Với policy network module, chúng tôi sử dụng số chiều nhúng cho các bản nhúng thực thể là 512, số chiều nhúng lịch sử là 128, số tầng mạng mô hình hóa lịch sử là 3, tỉ lệ drop cho các bản nhúng là 0.3, tỷ lệ drop cho các tầng feedforward là 0.1, và tỷ lệ drop cho các tầng LSTM là 0.0. Gradient clipping được chọn là 0.0 cho dữ liệu FB15k-237-10\%, FB15k-237-20\%, và WD-singer, và 5.0 cho NELL23k. Với search strategy module, số lượng cạnh cực đại của các cặp thực thể là 10, không gian hành động cực đại là 256. Kích thước beam search là 256 cho FB15k-237-10\%, FB15k-237-20\%, và  WD-singer, và 128 cho NELL23k. Với RL module, replay capacity được đặt là 32, decay rate là 0.05. Tỷ lệ drop cho action là 0.5 cho các tập FB15k-237-10\%, FB15k-237-20\%, và  WD-singer, và 0.0 cho NELL23k. Với training module, tần suất bước lấy mẫu là 3, kích thước batch là 128. Tỷ lệ học (learning rate) là 0.001 cho FB15k-237-10\%, FB15k-237-20\%, và  WD-singer, 0.01 cho NELL23k.
+
+\subsection{Experimental results}
+
+\begin{center}
+    \begin{table}[H]
+        \centering
+        \caption{Kết quả thực nghiệm trên tập dữ liệu FB15k-237 10\%.}
+        \begin{tabular}{llllll}
+            \toprule
+         & Hits@1 & Hits@3 & Hits@5 & Hits@10 & MRR \\
+            \midrule
+         DacKGR (sample) & --- &  .239 & --- &  .337&  .218\\
+         DacKGR (top) & --- &  .239 & --- & .335 & .219 \\
+         DacKGR (avg) & --- & .232 & --- & .334 & .215 \\
+         PAAR $\ast$& --- & --- & --- &  ---&  ---\\
+         PAAR $\star$&  .163802&  .24&  .2787328&  .330523&  .218495\\
+         PAAR-Complex-Quasi &  .142424 &  .166336&  .181708&  .207163&  .164770\\
+         PAAR-Fourier-Quasi & .152947 & .218072 & .254545 & .311570 &.203906  \\
+         \bottomrule
+        \end{tabular}
+    \end{table}
+\end{center}
+
+
+\begin{center}
+    \begin{table}[H]
+        \centering
+        \caption{Kết quả thực nghiệm trên tập dữ liệu FB15k-237 20\%.}
+        \begin{tabular}{llllll}
+            \toprule
+         & Hits@1 & Hits@3 & Hits@5 & Hits@10 & MRR \\
+            \midrule
+         DacKGR (sample) & --- &  .272 & --- &  .391&  .247\\
+         DacKGR (top) & --- &  .271 & --- & .389 & .244 \\
+         DacKGR (avg) & --- & .266 &---  & .388 & .242 \\
+         PAAR $\ast$&---  &  .263 & --- &  .375&  .241\\
+         PAAR $\star$&  .177184&  .264108 &  .305673&  .366707&  .239686\\
+         PAAR-Complex-Quasi &  .157767 &  .217941 &  .251922&  .300061& .204651\\
+         PAAR-Fourier-Quasi & .153216 & .213238 & .246056 & .296875 & .200583  \\
+         \bottomrule
+        \end{tabular}
+    \end{table}
+\end{center}
+
+
+\begin{center}
+    \begin{table}[H]
+        \centering
+        \caption{Kết quả thực nghiệm trên tập dữ liệu NELL23k.}
+        \begin{tabular}{llllll}
+            \toprule
+         & Hits@1 & Hits@3 & Hits@5 & Hits@10 & MRR \\
+            \midrule
+         DacKGR (sample) & --- &  .216 & --- & --- &  .201\\
+         DacKGR (top) & --- &  .20 &---  & --- & .191 \\
+         DacKGR (avg) & --- & .186 & --- & --- & .171 \\
+         PAAR $\ast$& --- &  .202 & --- &  .309 &  .184\\
+         PAAR $\star$&.128635&.216478 &.263328&.344709&.196448\\
+         PAAR-Complex-Quasi &.118336 &.192649&.232835&.295234&.175197\\
+         PAAR-Fourier-Quasi & .109249 & .187601 & .232431 & .305735 & .171130  \\
+         \bottomrule
+        \end{tabular}
+    \end{table}
+\end{center}
+
+
+\begin{center}
+    \begin{table}[H]
+        \centering
+        \caption{Kết quả thực nghiệm trên tập dữ liệu WD-Singer.}
+        \begin{tabular}{llllll}
+            \toprule
+         & Hits@1 & Hits@3 & Hits@5 & Hits@10 & MRR \\
+            \midrule
+         DacKGR (sample) & --- &  .423 & --- &  .506 &  .381\\
+         DacKGR (top) & --- &  .405 &---  &  .465 & .37 \\
+         DacKGR (avg) & --- & .401 & --- &  .48 & .364 \\
+         PAAR $\ast$& --- & --- & --- & --- &  ---\\
+         PAAR $\star$& .292782 & .397186 &.436223 &.486155&.358709\\
+         PAAR-Complex-Quasi &.127099 &.171584&.191103&.220608&.158798\\
+         PAAR-Fourier-Quasi & .224239 & .323196 & .366319 & .408988 & .287190  \\
+         \bottomrule
+        \end{tabular}
+    \end{table}
+\end{center}

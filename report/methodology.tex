@@ -1,0 +1,74 @@
+\section{Methodology}
+
+Trong phần này, báo cáo kỹ thuật trình bày tổng quan phương pháp đề xuất cho tác vụ nhúng đồ thị tri thức và tối ưu hóa mô hình. Chúng tôi cũng điểm lại những khái niệm cơ sở của học tăng cường trong ngữ cảnh dữ liệu đa quan hệ như đồ thị tri thức.
+
+\subsection{Reinforcement Learning Framework for Multi-hop KG Reasoning}
+
+\subsubsection{State space}
+
+\subsubsection{Action space}
+
+\subsubsection{Transition}
+
+\subsubsection{Reward}
+
+\subsubsection{Policy network}
+
+\subsection{Fourier-Knowledge graph embedding}
+
+\subsection{Optimization for learning KGE}
+
+\subsubsection{Adaptive Moment Estimation Method}
+
+Adaptive Moment Estimation Method hay Adam cũng thích ứng learning rate đến mỗi tham số. Nó lưu giữ cả mức giảm trung bình cấp số nhân giống như RMSProp và AdaDelta, và cả mức giảm gradient cấp số nhân như momentum. Nói một cách khác, Adam là một phương pháp tận dụng những lợi thế của những bộ tối ưu đi trước.
+
+Khởi tạo gradient và gradient bình phương về 0 dẫn đến sai lệch. Một cài đặt tinh chỉnh bias giúp giảm bớt các vấn đề và theo bài báo gốc, $\alpha = 0,001 $, $ \gamma_v = 0,9 $, $ \gamma_s = 0,999 $ và $ \epsilon = 1 \times 10 ^ {- 8} $. Các bước cập nhật cho thuật toán diễn ra như sau trong quá trình huấn luyện mạng học sâu:
+
+1) Cập nhật ước lượng momentum có thiên vị.
+
+\begin{equation}
+    \mathbf{v}^{(k+1)} = \gamma_v\mathbf{v}^{(k)} + (1-\gamma_v)\mathbf{g}^{(k)}
+\end{equation}
+
+2) Cập nhật ước lượng gradient có thiên vị.
+
+\begin{equation}
+    \mathbf{s}^{(k+1)} = \gamma_s\mathbf{s}^{(k)} + (1-\gamma_s)\left(\mathbf{g}^{(k)} \odot \mathbf{g}^{(k)}\right)
+\end{equation}
+
+3) Tính toán hiệu chỉnh ước lượng momentum có thiên vị.
+
+\begin{equation}
+    \hat{\mathbf{v}}^{(k+1)} = \mathbf{v}^{(k+1)} / (1-\gamma_v^k)
+\end{equation}
+
+4) Tính toán hiệu chỉnh ước lượng gradient có thiên vị.
+
+\begin{equation}
+    \hat{\mathbf{s}}^{(k+1)} = \mathbf{s}^{(k+1)} / (1-\gamma_s^k)
+\end{equation}
+
+5) Cập nhật tham số
+
+\begin{equation}
+    \mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} - \alpha\hat{\mathbf{v}}^{(k+1)} / \left(\epsilon + \sqrt{\hat{\mathbf{s}}^{(k+1)}}\right)
+\end{equation}
+
+\subsubsection{Quasi-Hyperbolic Momentum \& Adam}
+
+QHM (Quasi-Hyperbolic Momentum) là một thuật toán momentum thích ứng khác mà tách momentm ra khỏi gradient hiện tại khi cập nhật trọng số. Nói một cách khác, nó là trung bình có trong số của momentum và SGD đơn giản, tính theo gradient hiện tại với discount factor tức thời. Công thức cập nhật của Quasi-Hyperbolic Momentum có thể biến đổi trở về để suy biến trổ về Nesterov Momentum, Synthesized Nesterov Variants, accSGD và một số trường hợp khác. Luật cập nhật của thuật toán như sau:
+
+\begin{equation}
+    \mathbf{v}^{(k+1)} = \beta\mathbf{v}^{(k)} + (1-\beta) \cdot \mathbf{g}^{(k)}
+\end{equation}
+
+\begin{equation}
+    \mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} - \alpha \left[(1-\nu) \cdot \mathbf{g}^{(k)} + \nu \cdot \mathbf{v}^{(k+1)}\right]
+\end{equation}
+trong đó các hệ số $\nu = 0.7$ và $\beta = 0.999$
+
+\subsection{Designing for Action space}
+
+\subsection{Designing for State space}
+
+\subsection{Designing for Policy networks}
