@@ -1,5 +1,7 @@
 *.thm
 
+__pycache__
+
 # beamer
 *.nav
 *.pre
