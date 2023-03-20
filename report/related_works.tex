@@ -1,14 +1,53 @@
-\section{Related works}
+\section{Các công trình liên quan}
 Trong phần này, báo cáo khảo sát các công trình liên quan từ các phương pháp: knowledge graph reasoning, multi-hop KG reasoning, và deep reinforcement learning reasoning.
 
-\subsection{Knowledge graph reasoning}
-\lipsum[2]
-\lipsum[3]
+\subsection{Suy diễn đồ thị tri thức}
+Những nghiên cứu về suy diễn trong thời gian đầu tập trung vào các yếu tốt logic và luật (rules). 
+Các mô hình này học luật xác suất và được chọn lọc bởi con người, và được sử dụng để suy diễn những thể hiện quan hệ hay thể hiện đối tượng mới từ dữ liệu. 
+Tuy nhiên, nhược điểm của chúng rất nhiều, điển hình cả năng mở rộng trên dữ liệu lớn và khả năng tổng quát hóa chưa cao. Hiện nay, nhiều công trình tập trung và phát triển
+dựa trên phương pháp nhúng (embedding-based methods) mà cho phép suy diễn trên miền không gian liên tục chứ không phải miền không gian rời rạc. Hướng tiếp cận này
+có nhiều nhóm phương pháp và có thể phân loại chủ yếu thành bốn nhóm chính:
+\begin{itemize}
+    \item Translation-based models
+    \item Semantic matching-based models
+    \item Neural network-based models
+    \item Graph neural network-based models
+\end{itemize}
 
-\subsection{Multi-hop KG reasoning}
-\lipsum[2]
-\lipsum[3]
+Nhóm phương pháp Translation-based models gồm các mô hình dựa trên các phép biến đổi trên khác không gian đặc trưng khác nhau mà chủ yếu là phép tịnh tiến trong không gian vector
+để mô hình hóa tương tác giữa các đối tượng trong dữ liệu đồ thị. Đây là một trong những nhóm phương pháp cổ điển mà vẫn đảm bảo được tính hiệu quả. 
+Một số mô hình như TransE\cite{bordes2013translating}, TransH\cite{wang2014knowledge}, và TransR\cite{lin2015learning} thể hiện trong không gian Euclidean, còn một số mô hình khác như TorusE\cite{ebisu2018toruse} sử dụng 
+nền tảng của một nhóm Lie compact, RotatE\cite{sun2019rotate} sử dụng phép xoay trong không gian số phức hoặc ManifoldE\cite{xiao2015one} sử dụng phép tịnh tiến trong không gian đa tạp.
+Nhìn chung, nhóm các mô hình này được xây dựng trên các nền tảng toán học vững chãi từ hình học đến phương pháp tô-pô. Hệ quả là, với
+chiều nhúng thấp, chúng cho phép ta mô hình hóa và đạt được kế quả suy diễn khả quan với hiệu quả tính toán và chi phí thấp.
+Tuy nhiên, không dễ để có thể chọn lựa một không gian đặc trưng phù hợp cho dữ liệu.
 
-\subsection{Deep reinforcement learning reasoning}
-\lipsum[2]
-\lipsum[3]
+Nhóm phương pháp Semantic matching-based models gồm các mô hình dựa trên việc sử dụng một hàm tương đồng ngữ nghĩa (mà chủ yếu là phép nhân ma trận) để mà
+tính điểm cho một bộ ba dữ kiện mới. Nhóm này có thể phân loại thành những nhóm mô hình RESCAL và biến thể của nó và nhóm mô hình dựa trên hệ phức.
+Đối với các mô hình cùng họ với RESCAL như RESCAL\cite{nickel2011three}, DistMult\cite{yang2014embedding}, và TuckER\cite{balavzevic2019tucker}, chúng sử dụng nền tảng toán học phân rã ma trận. Các mô hình dựa trên hệ phức như ComplEx\cite{trouillon2017knowledge},
+QuatE\cite{zhang2019quaternion}, và QuatRE\cite{nguyen2022quatre} sử dụng không gian vector phức, và siêu phức để mô hình và tính toán tương đồng ngữ nghĩa.
+
+Nhóm phương pháp Neural network-based models sử dụng các mô hình mạng Neural thể mô hình hóa những đặc trưng phi tuyến nhằm thể hiện tri thức tiềm ẩn của dữ liệu.
+Các mô hình trong phương pháp này chủ yếu sử dụng các mô hình, kỹ thuật tính toán như Convolution, Capsule Network, và GAN để xây dựng mô hình nhúng đồ thị. Một số mô hình tiêu biểu 
+có thể kể đến như ConvE\cite{dettmers2018convolutional}, ConvR\cite{jiang2019adaptive}, InteractE\cite{vashishth2020interacte} và KBGAN\cite{cai2017kbgan}.
+
+Nhóm Graph neural network-based models tổng quát hóa các phương pháp Neural network-based models cho dữ liệu phi Euclidean. Đối với dữ liệu đồ thị tri thức, do tính phức tạp của nó
+nên hầu hết các mô hình thuộc nhóm này để được xây dựng dựa trên framework encoder-decoder. Một số mô hình tiêu biểu có thể kể đến như R-GCN\cite{schlichtkrull2018modeling}, SACN\cite{shang2019end}, và CompGCN\cite{vashishth2019composition}.
+
+Hầu hết các phương pháp nhúng đồ thị đều hiệu quả cho tác vụ suy diễn một bước (có thể hiểu là cận suy diễn). Tuy nhiên, vấn đề với các bài toán suy diễn đa bước, các phương pháp tiếp cận như thế hầu như đã chạm tới giới hạn.
+
+\subsection{Suy diễn đồ thị tri thức đa bước}
+
+Công trình nổi bật làm tiền đề cho suy diễn đa bước là  PRA, mà sử dụng bước đi ngẫu nhiên (random walk) để có được diễn giải hiệu quả cho các đường dẫn suy diễn trong dữ liệu đồ thị. Dựa trên PRA, các phương pháp sau này cải tiến để mô hình tính toán suy diễn hiệu quả hơn 
+và bớt tốn kém chi phí hơn. Các mô hình nổi bật bao gồm: Compositional Reasoning\cite{neelakantan2015compositional}, Chains-of-Reasoning\cite{das2016chains},  cor-PRA\cite{lao2015learning}, và  CPR\cite{wang2016knowledge}.
+
+\subsection{Suy diễn học sâu dựa trên học tăng cường}
+
+Trong tác vụ suy diễn đa bước, những phương pháp dựa trên học tăng cường xem quá trình suy diễn như một bài toán chuỗi quyết định (serialized decision problem) và sử dụng chiến lược huấn luyện của học tăng cường để quyết nó.
+Một số mô hình như DeepPath\cite{xiong2017deeppath} và MINERVA\cite{das2017go} thể hiện những đường đi như một quá trình quyết dịnh Markov (Markov Decision Process) và mã hóa lịch sử các quyết định bởi các mô hình mạng neural bộ nhớ (memory neural architecture) như RNN, 
+LSTM. Nhờ đó, các mô hình dựa trên hướng tiếp cận này có tiềm năng về khả năng bền vững và học các chuỗi suy diễn rất dài. Một số mô hình giải quyết vấn đề mở rộng động của dữ liệu đồ thị tri thức bằng cách kết hợp suy diễn đa bước và rút trích
+dữ kiện, điển hình là mô hình CPL\cite{fu2019collaborative}. 
+
+Với các phương pháp tối ưu gradient, các chiến lược cho việc chọn lựa luật phù hợp được học mà giảm được độ phức tạp tính toán cũng như khả năng mở rộng của mô hình.
+Các mô hình như MultiHopKG\cite{lin2018multi} sử dụng một mô hình nhúng được huấn luyện trước để ước lượng phần thưởng cho những dữ kiện chưa được nhìn thấy vả sử dụng các cạnh mặt nạ được phát sinh 
+ngẫu nhiên để mà khám phá nhiều hơn những đường đi có thể có. Tuy nhiên, vấn đề thông tin không chắc chắn và sự phân cấp của dữ liệu đồ thị vẫn là những thách thức cho nhiều mô hình hiện tại.

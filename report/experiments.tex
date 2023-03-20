@@ -1,8 +1,8 @@
-\section{Experiments}
+\section{Thực nghiệm}
 
-\subsection{Datasets, metrics, and settings}
+\subsection{Dữ liệu, các độ đo, và cài đặt}
 
-\subsubsection{Datasets}
+\subsubsection{Các bộ dữ liệu}
 
 Trong bài báo kỹ thuật này, chúng tôi sử dụng bốn tập dữ liệu thí nghiệm được lấy mẫu từ cơ sở dữ liệu Freebase\cite{bollacker2008freebase}, NELL\cite{carlson2010toward}, và Wikidata\cite{vrandevcic2014wikidata} cho phần thực nghiệm và đánh giá. Một cách cụ thể hơn, để thấy được mức độ hiệu quả của mô hình trên những bậc thưa (degree of sparsity) khác nhau, chúng tôi sử dụng hai bộ dữ liệu được xây dựng từ tập FB15k-237\cite{toutanova2015representing}, bao gồm: FB15k-237-10\% và FB15k-237-20\%. Những tập dữ liệu này được tạo ra bằng cách lấy ngẫu nhiên lần lượt 10\%, và 20\% số lượng bộ ba từ tập dữ liệu ban đầu.
 
@@ -26,7 +26,7 @@ Bên cạnh đó, chúng tôi sử dụng thêm hai bộ dữ liệu bao gồm N
     \end{table}
 \end{center}
 
-\subsubsection{Metrics}
+\subsubsection{Các độ đo}
 
 Với mỗi bộ ba dữ kiện $(h, r, t)$ trong tập dữ liệu, đầu tiên nó sẽ được chuyển đổi thành một bộ ba truy vấn $(h, r, ?)$, và sử dụng mô hình để có được danh sách thứ hạng của những thực thể bị thiếu tương ứng. Để đánh giá khả năng của phương pháp đề xuất, hai độ đo đánh giá được sử dụng: độ đo xếp hạng tương hỗ trung bình (mean reciprocal rank - MRR), và độ đo Hits@K.
 
@@ -154,13 +154,13 @@ $$
     Hits@3 = \frac{1}{1} = 1
     $$
 
-\subsubsection{Settings}
+\subsubsection{Cài đặt, cấu hình, môi trường thực nghiệm}
 
 Mô hình đề xuất  được thực nghiệm trên hệ điều hành Ubuntu 18.04.5 LTS, Intel i7-10700K (16) @ 5.100GHz và GPU NVIDIA GeForce RTX 3070 8 GB. Ngôn ngữ Python 3.7 được sử dụng làm ngôn ngữ lập trình để thực nghiệm vì nó hỗ trợ nhiều thư viện thuận tiện cho việc xây dựng các mô hình học máy cũng như dễ dàng trong việc phân tích đánh giá mô hình. Cụ thể, thuật toán sử dụng PyTorch làm thư viện chính để xây dựng mô hình.
 
 Chúng tôi sử dụng phương pháp tìm kiếm lưới (grid search) để tìm siêu tham số tối ưu cho phương pháp đề xuất. Với module KG, chúng tôi cài đặt số chiều nhúng là 200, và sử dụng Complex-Quasi và Fourier-Quasi như một mô hình được huấn luyện trước cho các module sau. Với policy network module, chúng tôi sử dụng số chiều nhúng cho các bản nhúng thực thể là 512, số chiều nhúng lịch sử là 128, số tầng mạng mô hình hóa lịch sử là 3, tỉ lệ drop cho các bản nhúng là 0.3, tỷ lệ drop cho các tầng feedforward là 0.1, và tỷ lệ drop cho các tầng LSTM là 0.0. Gradient clipping được chọn là 0.0 cho dữ liệu FB15k-237-10\%, FB15k-237-20\%, và WD-singer, và 5.0 cho NELL23k. Với search strategy module, số lượng cạnh cực đại của các cặp thực thể là 10, không gian hành động cực đại là 256. Kích thước beam search là 256 cho FB15k-237-10\%, FB15k-237-20\%, và  WD-singer, và 128 cho NELL23k. Với RL module, replay capacity được đặt là 32, decay rate là 0.05. Tỷ lệ drop cho action là 0.5 cho các tập FB15k-237-10\%, FB15k-237-20\%, và  WD-singer, và 0.0 cho NELL23k. Với training module, tần suất bước lấy mẫu là 3, kích thước batch là 128. Tỷ lệ học (learning rate) là 0.001 cho FB15k-237-10\%, FB15k-237-20\%, và  WD-singer, 0.01 cho NELL23k.
 
-\subsection{Experimental results}
+\subsection{Các kết quả thực nghiệm dự đoán liên kết}
 
 \begin{center}
     \begin{table}[H]
@@ -174,9 +174,9 @@ Chúng tôi sử dụng phương pháp tìm kiếm lưới (grid search) để t
          DacKGR (top) & --- &  .239 & --- & .335 & .219 \\
          DacKGR (avg) & --- & .232 & --- & .334 & .215 \\
          PAAR $\ast$& --- & --- & --- &  ---&  ---\\
-         PAAR $\star$&  .163802&  .24&  .2787328&  .330523&  .218495\\
-         PAAR-Complex-Quasi &  .142424 &  .166336&  .181708&  .207163&  .164770\\
-         PAAR-Fourier-Quasi & .152947 & .218072 & .254545 & .311570 &.203906  \\
+         PAAR $\star$&  .164&  .240&  .278&  .331&  .218\\
+         PAAR-Complex-Quasi &  .142 &  .166&  .182&  .207&  .165\\
+         PAAR-Fourier-Quasi & .153 & .218 & .255 & .312 &.204  \\
          \bottomrule
         \end{tabular}
     \end{table}
@@ -195,9 +195,9 @@ Chúng tôi sử dụng phương pháp tìm kiếm lưới (grid search) để t
          DacKGR (top) & --- &  .271 & --- & .389 & .244 \\
          DacKGR (avg) & --- & .266 &---  & .388 & .242 \\
          PAAR $\ast$&---  &  .263 & --- &  .375&  .241\\
-         PAAR $\star$&  .177184&  .264108 &  .305673&  .366707&  .239686\\
-         PAAR-Complex-Quasi &  .157767 &  .217941 &  .251922&  .300061& .204651\\
-         PAAR-Fourier-Quasi & .153216 & .213238 & .246056 & .296875 & .200583  \\
+         PAAR $\star$&  .177&  .264 &  .306&  .367&  .240\\
+         PAAR-Complex-Quasi &  .158 &  .218 &  .252&  .300& .205\\
+         PAAR-Fourier-Quasi & .153 & .214 & .246 & .297 & .201  \\
          \bottomrule
         \end{tabular}
     \end{table}
@@ -216,9 +216,9 @@ Chúng tôi sử dụng phương pháp tìm kiếm lưới (grid search) để t
          DacKGR (top) & --- &  .20 &---  & --- & .191 \\
          DacKGR (avg) & --- & .186 & --- & --- & .171 \\
          PAAR $\ast$& --- &  .202 & --- &  .309 &  .184\\
-         PAAR $\star$&.128635&.216478 &.263328&.344709&.196448\\
-         PAAR-Complex-Quasi &.118336 &.192649&.232835&.295234&.175197\\
-         PAAR-Fourier-Quasi & .109249 & .187601 & .232431 & .305735 & .171130  \\
+         PAAR $\star$&.129&.216 &.263&.345&.196\\
+         PAAR-Complex-Quasi &.118 &.193&.233&.295&.175\\
+         PAAR-Fourier-Quasi & .109 & .188 & .233 & .306 & .171  \\
          \bottomrule
         \end{tabular}
     \end{table}
@@ -237,10 +237,55 @@ Chúng tôi sử dụng phương pháp tìm kiếm lưới (grid search) để t
          DacKGR (top) & --- &  .405 &---  &  .465 & .37 \\
          DacKGR (avg) & --- & .401 & --- &  .48 & .364 \\
          PAAR $\ast$& --- & --- & --- & --- &  ---\\
-         PAAR $\star$& .292782 & .397186 &.436223 &.486155&.358709\\
-         PAAR-Complex-Quasi &.127099 &.171584&.191103&.220608&.158798\\
-         PAAR-Fourier-Quasi & .224239 & .323196 & .366319 & .408988 & .287190  \\
+         PAAR $\star$& .293 & .397 &.436 &.486&.359\\
+         PAAR-Complex-Quasi &.127 &.172&.191&.221&.159\\
+         PAAR-Fourier-Quasi & .224 & .323 & .366 & .409 & .287  \\
          \bottomrule
+        \end{tabular}
+    \end{table}
+\end{center}
+
+\subsection{Các kết quả thực nghiệm dự đoán liên kế trên từng loại quan hệ}
+
+
+\begin{center}
+    \begin{table}[H]
+        \centering
+        \caption{Thống kê các loại quan hệ trên các tập dữ liệu (test set).}
+        \begin{tabular}{lllll}
+        \toprule
+        Dataset & to-M relations & to-M examples & to-1 relations & to-1 examples \\
+        \midrule
+        FB15k-237 10\%& 55.0/216 & 6128.0/15624 &  161.0/216& 9496.0/15624 \\
+        FB15k-237 20\%& 89.0/223 & 9386.0/16963 & 134.0/223 & 7577.0/16963 \\
+        NELL23k& 68.0/189 & 3276.0/4961 & 121.0/189 & 1685.0/4961 \\
+        \bottomrule
+        \end{tabular}
+    \end{table}
+\end{center}
+
+
+\begin{center}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{llllll}
+        \toprule
+        \multirow{2}{*}{Dataset} & \multirow{2}{*}{Model} & \multicolumn{2}{l}{Partial graph} & \multicolumn{2}{l}{Full graph} \\
+                        &     &    To-M relations  &  To-1 relations &     To-M relations  &   To-1 relations       \\
+        \midrule
+        \multirow{4}{*}{}FB15k-237 10\% &\multirow{2}{*}{}PAAR-Complex-Quasi   &  .0226  &  .2593  &   .0234   &   .2599       \\
+        &       &           &          &           &          \\
+        &\multirow{2}{*}{}PAAR-Fourier-Quasi   &  .0225  &   .250   &   .2271   &   .2525       \\
+        &       &        &      &        &          \\
+        \multirow{4}{*}{}FB15k-237 20\% &\multirow{2}{*}{}PAAR-Complex-Quasi  & .0402   &  .4121  &  .0413   &   .4142       \\
+        &       &           &          &           &          \\
+        &\multirow{2}{*}{}PAAR-Fourier-Quasi   &  .0406  &  .3982    &   .0422   &    .401      \\
+        &       &        &      &        &          \\
+        \multirow{4}{*}{}Nell23k &\multirow{2}{*}{}PAAR-Complex-Quasi  & .1204   &  .2578  &   .1228  &   .2583   \\
+        &       &           &          &           &          \\
+        &\multirow{2}{*}{}PAAR-Fourier-Quasi   &  .1194  &   .2479   &  .1214    &  .2485        \\
+        &       &        &      &        &          \\
+        \bottomrule
         \end{tabular}
     \end{table}
 \end{center}
